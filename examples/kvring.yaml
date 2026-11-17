@@ -1,0 +1,54 @@
+server:
+  listen_addr: ":8000"
+  cockpit_addr: ":8484"
+  read_timeout: 120s
+  write_timeout: 120s
+  idle_timeout: 60s
+  max_header_bytes: 1048576
+
+bounded_load:
+  epsilon: 0.25
+  virtual_replicas: 100
+  vram_threshold: 0.85
+  min_tokens_for_prefix: 16
+
+affinity:
+  header_key: "X-Session-ID"
+  cookie_key: "session_id"
+  enable_prefix: true
+  prefix_length: 128
+  fallback_headers:
+    - "X-User-ID"
+    - "Authorization"
+
+health:
+  poll_interval: 2s
+  failure_threshold: 3
+  recovery_duration: 15s
+  vram_metric_name: "vllm:gpu_cache_usage_perc"
+
+telemetry:
+  prometheus_path: "/metrics"
+  enable_tracing: false
+
+workers:
+  - id: "worker-1"
+    url: "http://127.0.0.1:8001"
+    weight: 1
+    max_concurrency: 64
+    metrics_url: "http://127.0.0.1:8001/metrics"
+    health_timeout: 2s
+
+  - id: "worker-2"
+    url: "http://127.0.0.1:8002"
+    weight: 1
+    max_concurrency: 64
+    metrics_url: "http://127.0.0.1:8002/metrics"
+    health_timeout: 2s
+
+  - id: "worker-3"
+    url: "http://127.0.0.1:8003"
+    weight: 1
+    max_concurrency: 64
+    metrics_url: "http://127.0.0.1:8003/metrics"
+    health_timeout: 2s

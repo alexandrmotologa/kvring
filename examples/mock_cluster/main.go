@@ -1,0 +1,233 @@
+package main
+
+import (
+	"encoding/json"
+	"flag"
+	"fmt"
+	"math"
+	"math/rand"
+	"net/http"
+	"os"
+	"os/signal"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"syscall"
+	"time"
+)
+
+// MockWorker represents a simulated vLLM GPU inference instance.
+type MockWorker struct {
+	ID              string
+	Port            int
+	VramRatio       atomic.Uint64 // math.Float64bits
+	ActiveRequests  atomic.Int64
+	CachedSessions  sync.Map
+	Server          *http.Server
+}
+
+func newMockWorker(id string, port int, initialVram float64) *MockWorker {
+	mw := &MockWorker{
+		ID:   id,
+		Port: port,
+	}
+	mw.setVram(initialVram)
+	return mw
+}
+
+func (w *MockWorker) setVram(ratio float64) {
+	if ratio < 0 {
+		ratio = 0
+	} else if ratio > 1.0 {
+		ratio = 1.0
+	}
+	w.VramRatio.Store(math.Float64bits(ratio))
+}
+
+func (w *MockWorker) getVram() float64 {
+	return math.Float64frombits(w.VramRatio.Load())
+}
+
+func (w *MockWorker) Start() error {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v1/chat/completions", w.handleChatCompletions)
+	mux.HandleFunc("/metrics", w.handleMetrics)
+	mux.HandleFunc("/health", w.handleHealth)
+
+	w.Server = &http.Server{
+		Addr:    fmt.Sprintf("127.0.0.1:%d", w.Port),
+		Handler: mux,
+	}
+
+	go func() {
+		if err := w.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Printf("[%s] server error: %v\n", w.ID, err)
+		}
+	}()
+
+	return nil
+}
+
+func (w *MockWorker) handleHealth(rw http.ResponseWriter, _ *http.Request) {
+	rw.WriteHeader(http.StatusOK)
+	_, _ = rw.Write([]byte(`{"status":"ok"}`))
+}
+
+func (w *MockWorker) handleMetrics(rw http.ResponseWriter, _ *http.Request) {
+	rw.Header().Set("Content-Type", "text/plain; version=0.0.4")
+	vram := w.getVram()
+	active := w.ActiveRequests.Load()
+
+	fmt.Fprintf(rw, "# HELP vllm:gpu_cache_usage_perc GPU KV-cache usage percentage.\n")
+	fmt.Fprintf(rw, "# TYPE vllm:gpu_cache_usage_perc gauge\n")
+	fmt.Fprintf(rw, "vllm:gpu_cache_usage_perc{model=\"meta-llama/Llama-3.3-70B\"} %.4f\n", vram)
+
+	fmt.Fprintf(rw, "# HELP vllm:num_requests_running Running requests.\n")
+	fmt.Fprintf(rw, "# TYPE vllm:num_requests_running gauge\n")
+	fmt.Fprintf(rw, "vllm:num_requests_running{model=\"meta-llama/Llama-3.3-70B\"} %d\n", active)
+}
+
+type chatReq struct {
+	SessionID string `json:"session_id,omitempty"`
+	Stream    bool   `json:"stream,omitempty"`
+	Messages  []struct {
+		Role    string `json:"role"`
+		Content string `json:"content"`
+	} `json:"messages,omitempty"`
+}
+
+func (w *MockWorker) handleChatCompletions(rw http.ResponseWriter, req *http.Request) {
+	w.ActiveRequests.Add(1)
+	defer w.ActiveRequests.Add(-1)
+
+	sessionKey := req.Header.Get("X-Session-ID")
+	isSSE := strings.Contains(req.Header.Get("Accept"), "text/event-stream")
+
+	var payload chatReq
+	if req.Body != nil {
+		_ = json.NewDecoder(req.Body).Decode(&payload)
+		if payload.SessionID != "" && sessionKey == "" {
+			sessionKey = payload.SessionID
+		}
+		if payload.Stream {
+			isSSE = true
+		}
+	}
+
+	// Check if this session was previously cached on this GPU
+	isCacheHit := false
+	if sessionKey != "" {
+		if _, exists := w.CachedSessions.Load(sessionKey); exists {
+			isCacheHit = true
+		} else {
+			w.CachedSessions.Store(sessionKey, true)
+		}
+	}
+
+	// Simulate TTFT latency:
+	// Cache hit: fast prefill reuse (10-25ms)
+	// Cache miss: full transformer prompt prefill (80-140ms)
+	var ttftDelay time.Duration
+	if isCacheHit {
+		ttftDelay = time.Duration(10+rand.Intn(15)) * time.Millisecond
+	} else {
+		ttftDelay = time.Duration(80+rand.Intn(60)) * time.Millisecond
+	}
+	time.Sleep(ttftDelay)
+
+	// Dynamically adjust simulated VRAM
+	currentVram := w.getVram()
+	if currentVram < 0.88 {
+		w.setVram(currentVram + 0.02)
+		go func() {
+			time.Sleep(3 * time.Second)
+			w.setVram(w.getVram() - 0.02)
+		}()
+	}
+
+	if isSSE {
+		rw.Header().Set("Content-Type", "text/event-stream")
+		rw.Header().Set("Cache-Control", "no-cache")
+		rw.Header().Set("Connection", "keep-alive")
+		rw.WriteHeader(http.StatusOK)
+
+		flusher, canFlush := rw.(http.Flusher)
+		tokens := []string{"Autonomous", " LLM", " KV-cache", " routing", " active", " on", " " + w.ID, ".\n"}
+
+		for _, token := range tokens {
+			data := map[string]any{
+				"choices": []map[string]any{
+					{
+						"delta": map[string]string{"content": token},
+					},
+				},
+			}
+			raw, _ := json.Marshal(data)
+			fmt.Fprintf(rw, "data: %s\n\n", raw)
+			if canFlush {
+				flusher.Flush()
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+		fmt.Fprintf(rw, "data: [DONE]\n\n")
+		if canFlush {
+			flusher.Flush()
+		}
+		return
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
+	resp := map[string]any{
+		"id":      fmt.Sprintf("chatcmpl-%s-%d", w.ID, time.Now().UnixNano()),
+		"object":  "chat.completion",
+		"worker":  w.ID,
+		"cached":  isCacheHit,
+		"choices": []map[string]any{
+			{
+				"message": map[string]string{
+					"role":    "assistant",
+					"content": fmt.Sprintf("Response generated by %s (KV-Cache Hit: %v)", w.ID, isCacheHit),
+				},
+			},
+		},
+	}
+	_ = json.NewEncoder(rw).Encode(resp)
+}
+
+func main() {
+	ports := flag.String("ports", "8001,8002,8003", "Comma-separated ports for mock workers")
+	flag.Parse()
+
+	portList := strings.Split(*ports, ",")
+	var workers []*MockWorker
+
+	fmt.Println("🚀 Initializing Mock vLLM Cluster with Dynamic KV-Cache Telemetry...")
+	for i, pStr := range portList {
+		pStr = strings.TrimSpace(pStr)
+		var port int
+		fmt.Sscanf(pStr, "%d", &port)
+		id := fmt.Sprintf("worker-%d", i+1)
+
+		// Give worker-1 a slightly higher initial VRAM (e.g. 0.65) to simulate realistic cluster state
+		initialVram := 0.40 + float64(i)*0.15
+		mw := newMockWorker(id, port, initialVram)
+		if err := mw.Start(); err != nil {
+			fmt.Printf("Failed to start %s on port %d: %v\n", id, port, err)
+			os.Exit(1)
+		}
+		workers = append(workers, mw)
+		fmt.Printf("  ✔ Started %s on http://127.0.0.1:%d (Initial VRAM: %.1f%%)\n", id, port, initialVram*100)
+	}
+
+	fmt.Println("Mock vLLM Cluster running. Press Ctrl+C to terminate.")
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	fmt.Println("\nShutting down mock workers...")
+	for _, w := range workers {
+		_ = w.Server.Close()
+	}
+}

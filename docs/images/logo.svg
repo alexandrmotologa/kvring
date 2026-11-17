@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <clipPath id="squircle-clip">
+      <rect x="24" y="24" width="976" height="976" rx="220" />
+    </clipPath>
+
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="purple-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+
+    <linearGradient id="facet-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+
+    <linearGradient id="facet-mid" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+
+    <linearGradient id="facet-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <filter id="subtle-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.16" />
+    </filter>
+  </defs>
+
+  <!-- Luxury White Squircle Container -->
+  <rect x="24" y="24" width="976" height="976" rx="220" fill="#ffffff" stroke="#e2e8f0" stroke-width="6" />
+
+  <g clip-path="url(#squircle-clip)">
+    <g transform="translate(512, 512)" filter="url(#subtle-shadow)">
+
+      <!-- Hexagonal Architectural Gateway Outer -->
+      <polygon points="
+        0,-410
+        355,-205
+        355,205
+        0,410
+        -355,205
+        -355,-205
+      " fill="none" stroke="#0f172a" stroke-width="36" stroke-linejoin="round" />
+
+      <!-- Inner Virtual Ring Dashed Perimeter (Representing Consistent Hash Ring) -->
+      <circle cx="0" cy="0" r="320" fill="none" stroke="#7c3aed" stroke-width="4" stroke-dasharray="12 10" opacity="0.35" />
+      <circle cx="0" cy="0" r="300" fill="none" stroke="#00f5ff" stroke-width="3" stroke-dasharray="6 8" opacity="0.5" />
+
+      <!-- ======================================================================== -->
+      <!-- WATERTIGHT SOLID SILHOUETTE BASE (Prevents white background leak)         -->
+      <!-- ======================================================================== -->
+      <path d="
+        M 0 -220
+        C 90 -220 180 -180 240 -90
+        C 290 -20 310 80 270 180
+        C 230 270 130 300 80 230
+        C 70 210 70 170 90 140
+        C 120 90 160 80 180 130
+        C 190 150 180 180 160 190
+        C 200 130 200 50 160 -10
+        C 120 -70 50 -100 0 -110
+        C -50 -100 -120 -70 -160 -10
+        C -200 50 -200 130 -160 190
+        C -180 180 -190 150 -180 130
+        C -160 80 -120 90 -90 140
+        C -70 170 -70 210 -80 230
+        C -130 300 -230 270 -270 180
+        C -310 80 -290 -20 -240 -90
+        C -180 -180 -90 -220 0 -220
+        Z
+      " fill="#0b0f19" />
+
+      <!-- Head Base Solid Silhouette -->
+      <polygon points="
+        0,-160
+        95,-110
+        115,-20
+        85,130
+        0,210
+        -85,130
+        -115,-20
+        -95,-110
+      " fill="#0b0f19" />
+
+      <!-- ======================================================================== -->
+      <!-- THE SWEEPING CONSISTENT HASH RING HORNS (Low-Poly Origami Facets)       -->
+      <!-- ======================================================================== -->
+
+      <!-- Right Horn - Top Arc -->
+      <polygon points="0,-160 120,-190 180,-140 95,-110" fill="url(#facet-light)" />
+      <polygon points="120,-190 220,-130 250,-50 180,-140" fill="url(#facet-mid)" />
+      <polygon points="220,-130 280,-40 280,60 250,-50" fill="url(#facet-light)" />
+      <polygon points="280,-40 310,60 270,160 280,60" fill="url(#facet-mid)" />
+      <polygon points="280,60 270,160 210,230 220,140" fill="url(#facet-dark)" />
+      <polygon points="270,160 210,230 140,250 170,190" fill="url(#facet-mid)" />
+      <polygon points="210,230 140,250 100,210 140,170" fill="url(#facet-light)" />
+      <polygon points="140,250 100,210 110,140 140,170" fill="url(#purple-glow)" />
+
+      <!-- Right Horn - Inner Curl -->
+      <polygon points="180,-140 250,-50 200,20 130,-40" fill="url(#facet-dark)" />
+      <polygon points="250,-50 280,60 220,140 200,20" fill="url(#facet-mid)" />
+      <polygon points="200,20 220,140 170,190 150,90" fill="url(#facet-dark)" />
+      <polygon points="150,90 170,190 140,170 120,120" fill="url(#facet-light)" />
+
+      <!-- Left Horn - Top Arc (Symmetrical) -->
+      <polygon points="0,-160 -120,-190 -180,-140 -95,-110" fill="url(#facet-mid)" />
+      <polygon points="-120,-190 -220,-130 -250,-50 -180,-140" fill="url(#facet-light)" />
+      <polygon points="-220,-130 -280,-40 -280,60 -250,-50" fill="url(#facet-mid)" />
+      <polygon points="-280,-40 -310,60 -270,160 -280,60" fill="url(#facet-light)" />
+      <polygon points="-280,60 -270,160 -210,230 -220,140" fill="url(#facet-dark)" />
+      <polygon points="-270,160 -210,230 -140,250 -170,190" fill="url(#facet-mid)" />
+      <polygon points="-210,230 -140,250 -100,210 -140,170" fill="url(#facet-light)" />
+      <polygon points="-140,250 -100,210 -110,140 -140,170" fill="url(#purple-glow)" />
+
+      <!-- Left Horn - Inner Curl (Symmetrical) -->
+      <polygon points="-180,-140 -250,-50 -200,20 -130,-40" fill="url(#facet-dark)" />
+      <polygon points="-250,-50 -280,60 -220,140 -200,20" fill="url(#facet-mid)" />
+      <polygon points="-200,20 -220,140 -170,190 -150,90" fill="url(#facet-dark)" />
+      <polygon points="-150,90 -170,190 -140,170 -120,120" fill="url(#facet-light)" />
+
+      <!-- ======================================================================== -->
+      <!-- FOREHEAD & CRANIAL ARMOR PLATES                                          -->
+      <!-- ======================================================================== -->
+      <polygon points="0,-160 55,-90 0,-70" fill="url(#facet-light)" />
+      <polygon points="0,-160 -55,-90 0,-70" fill="url(#facet-mid)" />
+
+      <polygon points="0,-70 55,-90 95,-110 75,-30 0,-15" fill="url(#facet-mid)" />
+      <polygon points="0,-70 -55,-90 -95,-110 -75,-30 0,-15" fill="url(#facet-dark)" />
+
+      <!-- Central Crest Gem / Core Hash Node -->
+      <polygon points="0,-70 30,-40 0,-10 -30,-40" fill="url(#purple-glow)" />
+
+      <!-- Brow Armor Plates -->
+      <polygon points="0,-15 75,-30 115,-20 80,35 0,45" fill="url(#facet-light)" />
+      <polygon points="0,-15 -75,-30 -115,-20 -80,35 0,45" fill="url(#facet-mid)" />
+
+      <!-- ======================================================================== -->
+      <!-- PREDATORY GEOMETRIC ALMOND EYES (Electric Cyan Optics)                   -->
+      <!-- ======================================================================== -->
+      <!-- Right Eye Socket & Eye -->
+      <polygon points="40,5 75,-5 90,20 55,25" fill="#0b0f19" />
+      <polygon points="48,8 72,0 82,18 58,22" fill="url(#cyan-glow)" />
+      <polygon points="62,4 66,2 64,16 60,18" fill="#ffffff" />
+
+      <!-- Left Eye Socket & Eye -->
+      <polygon points="-40,5 -75,-5 -90,20 -55,25" fill="#0b0f19" />
+      <polygon points="-48,8 -72,0 -82,18 -58,22" fill="url(#cyan-glow)" />
+      <polygon points="-62,4 -66,2 -64,16 -60,18" fill="#ffffff" />
+
+      <!-- ======================================================================== -->
+      <!-- AERODYNAMIC MUZZLE & TITANIUM SLATE CHEEKBONES                          -->
+      <!-- ======================================================================== -->
+      <!-- Bridge of Nose -->
+      <polygon points="0,45 35,40 30,120 0,140" fill="url(#facet-mid)" />
+      <polygon points="0,45 -35,40 -30,120 0,140" fill="url(#facet-dark)" />
+
+      <!-- Lateral Whisker / Cheek Facets (Refined slate shades, NO buck teeth) -->
+      <polygon points="35,40 80,35 70,110 30,120" fill="#334155" />
+      <polygon points="-35,40 -80,35 -70,110 -30,120" fill="#1e293b" />
+
+      <polygon points="30,120 70,110 50,170 0,195 0,140" fill="#475569" />
+      <polygon points="-30,120 -70,110 -50,170 0,195 0,140" fill="#334155" />
+
+      <!-- Geometric Obsidian Nose Tip & Chin Keel -->
+      <polygon points="0,140 22,130 0,165 -22,130" fill="#0f172a" />
+      <polygon points="0,165 25,170 0,210 -25,170" fill="url(#cyan-glow)" opacity="0.85" />
+
+      <!-- Lateral Muzzle Highlights -->
+      <polygon points="25,170 50,170 30,200 0,210" fill="#64748b" />
+      <polygon points="-25,170 -50,170 -30,200 0,210" fill="#475569" />
+
+    </g>
+  </g>
+</svg>
