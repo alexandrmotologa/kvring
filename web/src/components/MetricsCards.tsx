@@ -21,7 +21,7 @@ export const MetricsCards: React.FC<Props> = ({ status }) => {
       color: '#8b5cf6',
     },
     {
-      title: 'Mirrokni Capacity Bound (C)',
+      title: 'Mirrokni Bound (C)',
       value: status.capacity_ceiling.toString(),
       subtext: `ceil((1 + ${status.epsilon}) * L / M)`,
       color: '#06b6d4',
@@ -41,7 +41,7 @@ export const MetricsCards: React.FC<Props> = ({ status }) => {
   ];
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+    <div className="metrics-grid">
       {cards.map((card, idx) => (
         <div
           key={idx}
@@ -49,19 +49,31 @@ export const MetricsCards: React.FC<Props> = ({ status }) => {
             backgroundColor: '#181c28',
             border: '1px solid #272d3f',
             borderRadius: '10px',
-            padding: '16px 20px',
+            padding: '14px 16px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: '6px',
+            boxSizing: 'border-box',
+            overflow: 'hidden',
           }}
         >
-          <span style={{ fontSize: '13px', color: '#8c96ac', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <span
+            style={{
+              fontSize: '11px',
+              color: '#8c96ac',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.4px',
+              lineHeight: 1.25,
+              wordBreak: 'break-word',
+            }}
+          >
             {card.title}
           </span>
-          <span style={{ fontSize: '28px', fontWeight: 700, color: card.color }}>
+          <span style={{ fontSize: 'clamp(20px, 3.5vw, 26px)', fontWeight: 700, color: card.color, lineHeight: 1.1 }}>
             {card.value}
           </span>
-          <span style={{ fontSize: '12px', color: '#8c96ac' }}>
+          <span style={{ fontSize: '10.5px', color: '#8c96ac', wordBreak: 'break-word', lineHeight: 1.2 }}>
             {card.subtext}
           </span>
         </div>

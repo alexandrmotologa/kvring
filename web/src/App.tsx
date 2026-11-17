@@ -91,21 +91,23 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '24px 20px' }}>
+    <div className="app-container">
       {/* Top Header */}
       <header
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          paddingBottom: '20px',
+          paddingBottom: '16px',
           borderBottom: '1px solid #272d3f',
-          marginBottom: '24px',
+          marginBottom: '20px',
           flexWrap: 'wrap',
           gap: '12px',
+          width: '100%',
+          boxSizing: 'border-box',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: '1 1 auto' }}>
           <div
             style={{
               width: '36px',
@@ -118,21 +120,22 @@ export const App: React.FC = () => {
               fontWeight: 800,
               fontSize: '18px',
               color: '#ffffff',
+              flexShrink: 0,
             }}
           >
             KV
           </div>
           <div>
-            <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#f0f3fa' }}>
-              kvring <span style={{ fontSize: '13px', fontWeight: 500, color: '#8c96ac' }}>Cluster Cockpit</span>
+            <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#f0f3fa' }}>
+              kvring <span style={{ fontSize: '12px', fontWeight: 500, color: '#8c96ac' }}>Cluster Cockpit</span>
             </h1>
-            <p style={{ fontSize: '12px', color: '#8c96ac' }}>
-              Zero-Allocation Mirrokni Consistent Hashing with Dynamic VRAM Telemetry
+            <p style={{ fontSize: '11px', color: '#8c96ac', wordBreak: 'break-word' }}>
+              Mirrokni Bounded-Load Consistent Hashing with VRAM Telemetry
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px', fontSize: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span
               style={{
@@ -144,7 +147,7 @@ export const App: React.FC = () => {
               }}
             />
             <span style={{ color: connected ? '#10b981' : '#f43f5e', fontWeight: 600 }}>
-              {connected ? 'LIVE TELEMETRY' : 'DISCONNECTED'}
+              {connected ? 'LIVE TELEMETRY' : 'CONNECTING'}
             </span>
           </div>
 
@@ -156,9 +159,10 @@ export const App: React.FC = () => {
               color: '#06b6d4',
               textDecoration: 'none',
               border: '1px solid #06b6d4',
-              padding: '4px 10px',
+              padding: '3px 8px',
               borderRadius: '4px',
               fontWeight: 600,
+              fontSize: '11px',
             }}
           >
             Prometheus /metrics
